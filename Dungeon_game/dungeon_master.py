@@ -474,8 +474,10 @@ def draw_map(variables) -> str:
         treasures.remove(pos)
 
     if pos == (3, 7):
-        print(pos)
         has_key = True
+    if pos == (43, 20):
+        sys.exit()
+        #start_boss_battle
 
     my_map[pos[1]][pos[0]] = '\033[92m𓀚\033[0m'
     ############################################################
@@ -508,6 +510,8 @@ def draw_map(variables) -> str:
                             my_map[index][j_index] = '\033[93m⚷\033[0m'
                     else:
                         my_map[index][j_index] = '\033[90m?\033[0m'
+                case 'Ω':
+                    my_map[index][j_index] = '\033[91mΩ\033[0m'
 
     display_map(my_map, coins)
 
