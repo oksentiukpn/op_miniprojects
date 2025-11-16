@@ -2,9 +2,10 @@
 Dungeon rpg game
 '''
 import random
-from time import sleep
+from time import sleep, perf_counter
 import sys
 import os
+from typing import List
 try:
     import msvcrt
 except ImportError:  # pragma: no cover - fallback for non-Windows platforms
@@ -28,6 +29,31 @@ POSIX_ARROW_KEYS = {
     b'C': 'D',
     b'D': 'A',
 }
+
+def rolling_animation(num_dices: int, duration: float = 2.0, refresh: float = 0.1,
+                      prefix: str = 'Rolling dice') -> None:
+    '''
+    Animate dice rolling by rapidly showing random ASCII dice faces.
+    '''
+    if num_dices <= 0:
+        return
+    end_time = perf_counter() + duration
+    printed_lines = 0
+    while perf_counter() < end_time:
+        animated = [random.choice(DICES) for _ in range(num_dices)]
+        block = f'{prefix}...\n{format_dice_rows(animated, color="\033[96m")}'
+        line_count = block.count('\n') + 1
+        if printed_lines:
+            sys.stdout.write(f'\033[{printed_lines}A')
+            sys.stdout.write('\033[J')
+        print(block)
+        sys.stdout.flush()
+        printed_lines = line_count
+        sleep(refresh)
+    if printed_lines:
+        sys.stdout.write(f'\033[{printed_lines}A')
+        sys.stdout.write('\033[J')
+        sys.stdout.flush()
 
 def get_single_keypress() -> bytes:
     '''
@@ -167,6 +193,31 @@ DICES = ['''
 | ●   ● |
 +-------+
 ''']
+
+def format_dice_rows(dices: List[str], color: str = '\033[94m',
+                     include_labels: bool = False) -> str:
+    '''
+    Create a printable block of dice faces; optionally include numeric labels.
+    '''
+    if not dices:
+        return ''
+    lines_ = []
+    if include_labels:
+        labels = [str(i + 1) for i in range(len(dices))]
+        for start in range(0, len(labels), 3):
+            slice_labels = '   '.join(labels[start:start + 3])
+            lines_.append(f'{color}{slice_labels}\033[0m')
+    printable = [dice.split('\n') for dice in dices]
+    for start in range(0, len(printable), 3):
+        chunk = printable[start:start + 3]
+        rows = len(chunk[0])
+        for row in range(rows):
+            row_content = '   '.join(face[row] for face in chunk)
+            lines_.append(f'{color}{row_content}\033[0m')
+        if start + 3 < len(printable):
+            lines_.append('')
+    return '\n'.join(lines_)
+
 with open('combinations.txt', 'r', encoding='utf-8') as file1:
     lines = file1.readlines()
     lines = dict([(line.strip()).split(' ') for line in lines])
@@ -179,15 +230,13 @@ def bot_move() -> int:
     finding the most valuable combo and returning its score.
     '''
 
+    rolling_animation(6, prefix='Bot is rolling')
     dices = [DICES[random.choice(range(len(DICES)))] for _ in range(6)]
     print('\nBot rolls the dice!')
-    printable = [dice.split('\n') for dice in dices]
-
-    for row in range(len(printable[0])):
-        print(f'\033[91m{'   '.join(printable[i][row] for i in range(3))}\033[0m')
-    print()
-    for row in range(len(printable[0])):
-        print(f'\033[91m{'   '.join(printable[i][row] for i in range(3, 6))}\033[0m')
+    block = format_dice_rows(dices, color='\033[91m')
+    if block:
+        print(block)
+        print()
 
     combos = find_combinations('123456', dices)
     if not combos:
@@ -259,6 +308,7 @@ def player_move(num_dices: int, combo_result) -> int:
             return combo_result
         print('Wrong input!!!')
 
+    rolling_animation(num_dices, prefix='Rolling your dice')
     dices = [DICES[random.choice(range(6))] for _ in range(num_dices)]
     zero = False # Check for combos
 
@@ -275,16 +325,9 @@ def player_move(num_dices: int, combo_result) -> int:
 
     print('YOUR DICES!!!')
     print('Dice numbers:')
-    labels = [str(i + 1) for i in range(len(dices))]
-
-    for start in range(0, len(labels), 3):
-        print(f'\033[94m{'   '.join(labels[start:start+3])}\033[0m')
-    printable = [dice.split('\n') for dice in dices]
-
-    for start in range(0, len(printable), 3):
-        chunk = printable[start:start+3]
-        for row in range(len(chunk[0])):
-            print(f'\033[94m{'   '.join(d[row] for d in chunk)}\033[0m')
+    dice_block = format_dice_rows(dices, include_labels=True)
+    if dice_block:
+        print(dice_block)
         print()
     if zero:
         print('\033[91mZero combos, opponent`s turn!\033[0m')
@@ -507,6 +550,9 @@ def draw_rules() -> None:
     '''
     Just drawing rules in start of the game
     '''
+    #####
+    # exit for exit
+    ####
     print('Rules:')
 
 def move(variables):
@@ -551,7 +597,7 @@ def move(variables):
     direction = read_direction()
 
     if direction == 'quit':
-        exit()
+        sys.exit()
     if direction == 'startminigame':
         game()
     direction = direction.upper()
@@ -597,7 +643,13 @@ if __name__ == '__main__':
             treasures = [(int(i[1]), int(i[0])) for i in treasures]
         variables = {0: blocks, 1: coins, 2: treasures, 3: has_key, 4: pos, 5: etap, 6: hp}
         draw_map(variables)
-
-    main()
+    try:
+        main()
+    except KeyboardInterrupt:
+        print()
+        print('\033[91m====================================================')
+        print('KeyboardInterruptError!')
+        print('\033[91m====================================================\033[0m')
+        sys.exit()
     import doctest
     print(doctest.testmod())
