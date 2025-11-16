@@ -30,6 +30,8 @@ POSIX_ARROW_KEYS = {
     b'D': 'A',
 }
 
+
+
 def rolling_animation(num_dices: int, duration: float = 2.0, refresh: float = 0.1,
                       prefix: str = 'Rolling dice') -> None:
     '''
@@ -302,6 +304,9 @@ def player_move(num_dices: int, combo_result) -> int:
 
     print('Type <roll> to roll dices or <pass> to pass')
     while(input1:=input('\033[95m>>> \033[0m')) !='roll':
+        if input1 == 'exit':
+            print('\n\033[91mUSED EXIT!!!\033[0m')
+            sys.exit()
         if input1 == 'quit':
             return None
         if input1 == 'pass':
@@ -339,7 +344,9 @@ def player_move(num_dices: int, combo_result) -> int:
 pass to score and pass\nType quit to quit")
 
     while(input1:=input('\033[95m>>> \033[0m')) != 'quit':
-
+        if input1 == 'exit':
+            print('\n\033[91mUSED EXIT!!!\033[0m')
+            sys.exit()
         if input1 == 'pass':
             passing = True
             break
@@ -511,6 +518,9 @@ def draw_map(variables) -> str:
         print('Type skip to skip rules')
         print('Type start to draw rules')
         while(input1:=input('\033[95m>>> \033[0m')) !='start':
+            if input1 == 'exit':
+                print('\n\033[91mUSED EXIT!!!\033[0m')
+                sys.exit()
             if input1 == 'skip':
                 print(DICE_RULES)
                 break
@@ -530,6 +540,9 @@ def draw_map(variables) -> str:
                 else:
                     sleep(speed)
         while(input1:=input('\033[95m>>> \033[0m')) !='start':
+            if input1 == 'exit':
+                print('\n\033[91mUSED EXIT!!!\033[0m')
+                sys.exit()
             if input1 == 'quit':
                 break
             print('Wrong input!!!')
