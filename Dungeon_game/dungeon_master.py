@@ -5,7 +5,16 @@ import random
 from time import sleep
 import sys
 import os
-import msvcrt
+try:
+    import msvcrt
+except ImportError:  # pragma: no cover - fallback for non-Windows platforms
+    msvcrt = None
+try:  # pragma: no cover - Windows builds do not provide these modules
+    import termios  # type: ignore
+    import tty  # type: ignore
+except ImportError:
+    termios = None  # type: ignore
+    tty = None  # type: ignore
 
 ARROW_KEYS = {
     b'H': 'W',  # up arrow
@@ -13,6 +22,37 @@ ARROW_KEYS = {
     b'K': 'A',  # left arrow
     b'M': 'D',  # right arrow
 }
+POSIX_ARROW_KEYS = {
+    b'A': 'W',
+    b'B': 'S',
+    b'C': 'D',
+    b'D': 'A',
+}
+
+def get_single_keypress() -> bytes:
+    '''
+    Platform-independent single key reader.
+    '''
+    if msvcrt is not None:
+        return msvcrt.getch()
+    if termios is None or tty is None:
+        raise RuntimeError('Terminal control modules unavailable on this platform')
+    fd = sys.stdin.fileno()
+    old_settings = termios.tcgetattr(fd)
+    try:
+        tty.setraw(fd)
+        char = sys.stdin.read(1)
+        if char == '\x1b':
+            char += sys.stdin.read(1)
+            if char.endswith('['):
+                while True:
+                    next_char = sys.stdin.read(1)
+                    char += next_char
+                    if next_char.isalpha() or next_char == '~':
+                        break
+        return char.encode()
+    finally:
+        termios.tcsetattr(fd, termios.TCSADRAIN, old_settings)
 DICE_RULES = """
 ══════════════════════════════════════════════
 🎲 DICE GAME FARKLE ⚔️
@@ -476,18 +516,30 @@ def move(variables):
     def read_direction():
         print('\033[95m>>> \033[0m', end='', flush=True)
         while True:
-            key = msvcrt.getch()
-            if key == b'\r':
+            key = get_single_keypress()
+            if key in (b'\r', b'\n'):
                 continue  # ignore Enter
-            if key == b'\xe0':  # special key prefix
-                key = msvcrt.getch()
-                if key in ARROW_KEYS:
-                    print()  # move to next line
-                    return ARROW_KEYS[key]
-            elif key.lower() in b'wasd':
-                print(key.decode().upper())
-                return key.decode().upper()
-            elif key == b'q':
+            if msvcrt is not None and key == b'\xe0':  # special key prefix on Windows
+                key = get_single_keypress()
+                direction = ARROW_KEYS.get(key)
+                if direction:
+                    print()
+                    return direction
+                continue
+            if key.startswith(b'\x1b'):  # escape sequences on POSIX terminals
+                direction = POSIX_ARROW_KEYS.get(key[-1:])
+                if direction:
+                    print()
+                    return direction
+                continue
+            try:
+                char = key.decode()
+            except UnicodeDecodeError:
+                continue
+            if char.lower() in 'wasd':
+                print(char.upper())
+                return char.upper()
+            if char.lower() == 'q':
                 return 'quit'
     blocks = variables[0]
     coins = variables[1]
