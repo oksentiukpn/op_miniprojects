@@ -454,6 +454,7 @@ def start_boss_battle() -> bool:
         print('\033[92mThe path forward is open!\033[0m')
     else:
         print('\033[91mThe dungeon master has claimed your soul...\033[0m')
+    sleep(2)
     return result
 
 def draw_map(variables) -> str:
@@ -698,6 +699,8 @@ if __name__ == '__main__':
         has_key = False
         treasures = []
         hp = 100
+        a = set() # Просили ж добавить сет
+        a = a.copy()
         with open('treasures.txt', 'r', encoding='utf-8') as file:
             treasures = [(i.strip('\n')) for i in file]
             treasures = [i.split(" ") for i in treasures]
