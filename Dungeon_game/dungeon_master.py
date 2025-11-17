@@ -652,8 +652,6 @@ if __name__ == '__main__':
         has_key = False
         treasures = []
         hp = 100
-        a = 0.0 # Добавив float
-        a = a*a
         with open('treasures.txt', 'r', encoding='utf-8') as file:
             treasures = [(i.strip('\n')) for i in file]
             treasures = [i.split(" ") for i in treasures]
