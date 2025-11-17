@@ -219,28 +219,32 @@ def format_dice_rows(dices: List[str], color: str = '\033[94m',
         if start + 3 < len(printable):
             lines_.append('')
     return '\n'.join(lines_)
-
-with open('combinations.txt', 'r', encoding='utf-8') as file1:
-    lines = file1.readlines()
-    lines = dict([(line.strip()).split(' ') for line in lines])
+def create_combinations() -> dict:
+    '''
+    Reading file with combinations
+    '''
+    with open('combinations.txt', 'r', encoding='utf-8') as file1:
+        lines = file1.readlines()
+        lines = dict([(line.strip()).split(' ') for line in lines])
     lines = {tuple(DICES[int(i)-1] for i in combo): int(points) for combo, points in lines.items()}
-COMBINATIONS = lines
+    return lines
+COMBINATIONS = create_combinations()
 
-def bot_move() -> int:
+def bot_move(num_dices: int = 6) -> int:
     '''
     Automatically perform the bot move by rolling all dice,
     finding the most valuable combo and returning its score.
     '''
 
-    rolling_animation(6, prefix='Bot is rolling')
-    dices = [DICES[random.choice(range(len(DICES)))] for _ in range(6)]
+    rolling_animation(num_dices, prefix='Bot is rolling')
+    dices = [DICES[random.choice(range(len(DICES)))] for _ in range(num_dices)]
     print('\nBot rolls the dice!')
     block = format_dice_rows(dices, color='\033[91m')
     if block:
         print(block)
         print()
 
-    combos = find_combinations('123456', dices)
+    combos = find_combinations(''.join(str(i + 1) for i in range(num_dices)), dices)
     if not combos:
         print('Bot got zero combos this turn.')
         return 0
@@ -415,6 +419,43 @@ def game() -> bool:
 
     return player_points >= bot_points
 
+def boss_battle() -> bool:
+    '''
+    Harder dice minigame variant where the boss rolls 9 dice.
+    '''
+    player_points = 0
+    boss_points = 0
+
+    while player_points < 4000 and boss_points < 4000:
+        player_plus = player_move(6, 0)
+        if player_plus is None:
+            return False
+        player_points += player_plus
+        boss_points += bot_move(9) // 2
+        print(f'BOSS POINTS: \033[91m{boss_points}\033[0m')
+        print(f'YOUR POINTS: \033[92m{player_points}\033[0m')
+        print('\033[93m=========================================\033[0m')
+
+    if player_points >= boss_points:
+        print('\033[92mYOU DEFEATED THE BOSS!!!\033[0m')
+    else:
+        print('\033[91mTHE BOSS PREVAILED!!!\033[0m')
+
+    return player_points >= boss_points
+
+def start_boss_battle() -> bool:
+    '''
+    Trigger the boss battle minigame and return True if the player wins.
+    '''
+    print('\033[91mYOU ENTERED THE BOSS ROOM!!!\033[0m')
+    print('Defeat the boss in an enhanced dice duel to proceed.')
+    result = boss_battle()
+    if result:
+        print('\033[92mThe path forward is open!\033[0m')
+    else:
+        print('\033[91mThe dungeon master has claimed your soul...\033[0m')
+    return result
+
 def draw_map(variables) -> str:
     '''
     Generating map for the game
@@ -439,6 +480,8 @@ def draw_map(variables) -> str:
 
     match etap:
         case 0:
+            file_path = 'map1.txt'
+        case _:
             file_path = 'map1.txt'
     with open(file_path, 'r', encoding='utf-8') as file:
         my_map = file.read()
@@ -475,9 +518,12 @@ def draw_map(variables) -> str:
 
     if pos == (3, 7):
         has_key = True
-    if pos == (43, 20):
-        sys.exit()
-        #start_boss_battle
+    if pos == (43, 20) and etap == 0:
+        if not start_boss_battle():
+            print('!You lost all!??????')
+            print('\033[91mGG\033[0m')
+            sys.exit()
+        etap = 1
 
     my_map[pos[1]][pos[0]] = '\033[92m𓀚\033[0m'
     ############################################################
