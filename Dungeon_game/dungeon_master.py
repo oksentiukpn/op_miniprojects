@@ -33,7 +33,7 @@ POSIX_ARROW_KEYS = {
 
 
 def rolling_animation(num_dices: int, duration: float = 2.0, refresh: float = 0.1,
-                      prefix: str = 'Rolling dice') -> None:
+                      prefix: str = 'Rolling dice', color: str = '\033[96m') -> None:
     '''
     Animate dice rolling by rapidly showing random ASCII dice faces.
     '''
@@ -43,7 +43,7 @@ def rolling_animation(num_dices: int, duration: float = 2.0, refresh: float = 0.
     printed_lines = 0
     while perf_counter() < end_time:
         animated = [random.choice(DICES) for _ in range(num_dices)]
-        block = f'{prefix}...\n{format_dice_rows(animated, color="\033[96m")}'
+        block = f'{prefix}...\n{format_dice_rows(animated, color=color)}'
         line_count = block.count('\n') + 1
         if printed_lines:
             sys.stdout.write(f'\033[{printed_lines}A')
@@ -236,7 +236,7 @@ def bot_move(num_dices: int = 6) -> int:
     finding the most valuable combo and returning its score.
     '''
 
-    rolling_animation(num_dices, prefix='Bot is rolling')
+    rolling_animation(num_dices, prefix='Bot is rolling', color = '\033[91m')
     dices = [DICES[random.choice(range(len(DICES)))] for _ in range(num_dices)]
     print('\nBot rolls the dice!')
     block = format_dice_rows(dices, color='\033[91m')
@@ -317,7 +317,7 @@ def player_move(num_dices: int, combo_result) -> int:
             return combo_result
         print('Wrong input!!!')
 
-    rolling_animation(num_dices, prefix='Rolling your dice')
+    rolling_animation(num_dices, prefix='Rolling your dice', color = '\033[94m')
     dices = [DICES[random.choice(range(6))] for _ in range(num_dices)]
     zero = False # Check for combos
 
