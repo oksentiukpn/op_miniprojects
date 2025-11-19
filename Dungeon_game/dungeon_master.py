@@ -292,6 +292,8 @@ def check_combo(choosen, num_dices, dices) -> bool:
 
     if not choosen or not ("".join(choosen)).isdigit() or len(choosen) > num_dices:
         return False
+    if not all(0 < int(i) <= 6 for i in choosen):
+        return False
     if any(choosen.count(i) != 1 for i in choosen):
         return False
     if not find_combinations(choosen, dices):
@@ -451,7 +453,7 @@ def start_boss_battle() -> bool:
     print('Defeat the boss in an enhanced dice duel to proceed.')
     result = boss_battle()
     if result:
-        print('\033[92mThe path forward is open!\033[0m')
+        print('\033[92mYou are free now!\033[0m')
     else:
         print('\033[91mThe dungeon master has claimed your soul...\033[0m')
     sleep(2)
@@ -538,7 +540,7 @@ def draw_map(variables) -> str:
             print('\033[91mYou are bad at this!\033[0m')
         else:
             print('\033[93mCould be better?\033[0m')
-        print('\033[95THANKS FOR PLAYING!\033[0m')
+        print('\033[95mTHANKS FOR PLAYING!\033[0m')
         sys.exit()
 
     ############################################################
@@ -576,7 +578,7 @@ def draw_map(variables) -> str:
 
     display_map(my_map, coins)
 
-    n = random.choice(range(30))
+    n = random.randint(0, 40)
     if n == 0: # Minigame appearing
         win = False
         print('\033[91mITS A TRAP!!!\033[0m')
@@ -628,10 +630,69 @@ def draw_rules() -> None:
     '''
     Just drawing rules in start of the game
     '''
-    #####
-    # exit for exit
-    ####
-    print('Rules:')
+
+    logo = """
+╔═══════════════════════════════════════════════════════════════════╗
+║                                                                   ║
+║  ██████╗ ██╗   ██╗███╗   ██╗ ██████╗ ███████╗ ██████╗ ███╗   ██╗  ║
+║  ██╔══██╗██║   ██║████╗  ██║██╔════╝ ██╔════╝██╔═══██╗████╗  ██║  ║
+║  ██║  ██║██║   ██║██╔██╗ ██║██║  ███╗█████╗  ██║   ██║██╔██╗ ██║  ║
+║  ██║  ██║██║   ██║██║╚██╗██║██║   ██║██╔══╝  ██║   ██║██║╚██╗██║  ║
+║  ██████╔╝╚██████╔╝██║ ╚████║╚██████╔╝███████╗╚██████╔╝██║ ╚████║  ║
+║  ╚═════╝  ╚═════╝ ╚═╝  ╚═══╝ ╚═════╝ ╚══════╝ ╚═════╝ ╚═╝  ╚═══╝  ║
+║                                                                   ║
+║          ███╗   ███╗ █████╗ ███████╗████████╗███████╗██████╗      ║
+║          ████╗ ████║██╔══██╗██╔════╝╚══██╔══╝██╔════╝██╔══██╗     ║
+║          ██╔████╔██║███████║███████╗   ██║   █████╗  ██████╔╝     ║
+║          ██║╚██╔╝██║██╔══██║╚════██║   ██║   ██╔══╝  ██╔══██╗     ║
+║          ██║ ╚═╝ ██║██║  ██║███████║   ██║   ███████╗██║  ██║     ║
+║          ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝     ║
+║                                                                   ║
+║              ⚔️  Descend into the Depths  ⚔️                        ║
+║                                                                   ║
+╚═══════════════════════════════════════════════════════════════════╝
+"""
+    for line in logo.strip("\n").splitlines():
+        print(f"\033[94m{line}\033[0m")
+        sleep(0.05)
+
+    lines = [
+        "Story: You are Arlen, the last Torchbearer, diving into the Sapphire Dungeon to",
+        "rescue the lost guild archivist and recover the map fragments that keep the",
+        "surface kingdoms safe from the creeping night.",
+        "Every floor reconfigures itself, so each step you take redraws destiny.",
+        "",
+        "Core Rules:",
+        "- Explore carefully, gather coins, and trigger treasure events by stepping on them.",
+        "- Regular encounters use six fate dice; string together combos to bank points.",
+        "- Farkles (no scoring dice) erase the round, so decide when to stop rolling.",
+        "- Boss Alert: the Obsidian Warden hurls nine dice, but every combo he makes is",
+        "  worth only half the normal points—survive his barrage to claim the crown.",
+        "",
+        "Controls:",
+        "- Move with W/A/S/D or the arrow keys; each tap shifts you one tile.",
+        "- Press Q at any time to abandon the run and return to camp.",
+    ]
+    text = "\n".join(lines) + "\n"
+    for char in text:
+        sys.stdout.write(char)
+        sys.stdout.flush()
+        if char in '═─':
+            speed = 0.001
+        else:
+            speed = 0.02
+        if char in ".!?":
+            sleep(5 * speed)
+        elif char == "\n":
+            sleep(10 * speed)
+        else:
+            sleep(speed)
+    print("Type start to start, or quit to quit")
+    while(input1:=input('\033[95m>>> \033[0m')) !='start':
+        if input1 == 'quit':
+            print('\n\033[91mUSED EXIT!!!\033[0m')
+            sys.exit()
+        print('Wrong input!!!')
 
 def move(variables):
     '''
@@ -705,7 +766,7 @@ if __name__ == '__main__':
         '''
         Main function for programm
         '''
-
+        draw_rules()
         blocks = {'W': True, 'A': True, 'S': False, 'D': False}
         coins = 0
         etap = 0
@@ -714,7 +775,7 @@ if __name__ == '__main__':
         treasures = []
         hp = 100
         a = set() # Просили ж добавить сет
-        a = a.copy()
+        a = a.intersection(a)
         with open('treasures.txt', 'r', encoding='utf-8') as file:
             treasures = [(i.strip('\n')) for i in file]
             treasures = [i.split(" ") for i in treasures]
@@ -729,5 +790,3 @@ if __name__ == '__main__':
         print('KeyboardInterruptError!')
         print('\033[91m====================================================\033[0m')
         sys.exit()
-    import doctest
-    print(doctest.testmod())
