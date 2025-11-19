@@ -517,16 +517,30 @@ def draw_map(variables) -> str:
         coins += 1
         treasures.remove(pos)
 
+    my_map[pos[1]][pos[0]] = '\033[92m𓀚\033[0m'
+
     if pos == (3, 7):
         has_key = True
-    if pos == (43, 20) and etap == 0:
+    if pos == (43, 20):
         if not start_boss_battle():
             print('!You lost all!??????')
             print('\033[91mGG\033[0m')
-            sys.exit()
-        etap = 1
+            hp = 0
+        else:
+            print("\033[92m!!!!!TRUE WINNER!!!!!\033[0m")
+        print(f'You found {coins}/16 coins')
+        print(f"Your hp: {hp}/100")
+        score = round((hp/2 + (coins/8)*25), 1)
+        print(f"Total score: {score}/100")
+        if score >= 70:
+            print('\033[92mGood job!\033[0m')
+        elif score <= 40:
+            print('\033[91mYou are bad at this!\033[0m')
+        else:
+            print('\033[93mCould be better?\033[0m')
+        print('\033[95THANKS FOR PLAYING!\033[0m')
+        sys.exit()
 
-    my_map[pos[1]][pos[0]] = '\033[92m𓀚\033[0m'
     ############################################################
     for index, value in enumerate(my_map): # colorize and draw visible area
         for j_index, j_value in enumerate(value):
