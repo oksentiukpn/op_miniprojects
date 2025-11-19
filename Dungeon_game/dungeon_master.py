@@ -469,7 +469,8 @@ def draw_map(variables) -> str:
         Printing map
         '''
         os.system('cls' if os.name == 'nt' else 'clear') # clear terminal
-        print(f"Your coins: {coins}")
+        print(f"Your hp: \033[91m{hp}/100\033[0m")
+        print(f"Your coins: \033[93m{coins}/16\033[0m")
         print('\n'.join(["".join(i) for i in my_map]))
 
     # variables = {0: blocks, 1: coins, 2: treasures, 3: has_key, 4: pos}
@@ -648,7 +649,7 @@ def draw_rules() -> None:
 ║          ██║ ╚═╝ ██║██║  ██║███████║   ██║   ███████╗██║  ██║     ║
 ║          ╚═╝     ╚═╝╚═╝  ╚═╝╚══════╝   ╚═╝   ╚══════╝╚═╝  ╚═╝     ║
 ║                                                                   ║
-║              ⚔️  Descend into the Depths  ⚔️                        ║
+║                 ⚔️  Descend into the Depths  ⚔️                     ║
 ║                                                                   ║
 ╚═══════════════════════════════════════════════════════════════════╝
 """
