@@ -767,27 +767,28 @@ if __name__ == '__main__':
         '''
         Main function for programm
         '''
-        draw_rules()
-        blocks = {'W': True, 'A': True, 'S': False, 'D': False}
-        coins = 0
-        etap = 0
-        pos = (3, 1)
-        has_key = False
-        treasures = []
-        hp = 100
-        a = set() # Просили ж добавить сет
-        a = a.intersection(a)
-        with open('treasures.txt', 'r', encoding='utf-8') as file:
-            treasures = [(i.strip('\n')) for i in file]
-            treasures = [i.split(" ") for i in treasures]
-            treasures = [(int(i[1]), int(i[0])) for i in treasures]
-        variables = {0: blocks, 1: coins, 2: treasures, 3: has_key, 4: pos, 5: etap, 6: hp}
-        draw_map(variables)
-    try:
-        main()
-    except KeyboardInterrupt:
-        print()
-        print('\033[91m====================================================')
-        print('KeyboardInterruptError!')
-        print('\033[91m====================================================\033[0m')
-        sys.exit()
+        try:
+            draw_rules()
+            blocks = {'W': True, 'A': True, 'S': False, 'D': False}
+            coins = 0
+            etap = 0
+            pos = (3, 1)
+            has_key = False
+            treasures = []
+            hp = 100
+            a = set() # Просили ж добавить сет
+            a = a.intersection(a)
+            with open('treasures.txt', 'r', encoding='utf-8') as file:
+                treasures = [(i.strip('\n')) for i in file]
+                treasures = [i.split(" ") for i in treasures]
+                treasures = [(int(i[1]), int(i[0])) for i in treasures]
+            variables = {0: blocks, 1: coins, 2: treasures, 3: has_key, 4: pos, 5: etap, 6: hp}
+            draw_map(variables)
+        except KeyboardInterrupt:
+            print()
+            print('\033[91m====================================================')
+            print('KeyboardInterruptError!')
+            print('\033[91m====================================================\033[0m')
+            sys.exit()
+
+    main()
